@@ -63,6 +63,7 @@ class Stimulus:
         self.run_closed_loop_before = True
         self.run_open_loop = True
         self.run_closed_loop_after = True
+        self.display_dark = False # added line
 
         self.fade_start = abs(self.settings.fade_start)
         self.fade_end = abs(self.settings.fade_end)
@@ -102,6 +103,14 @@ class Stimulus:
         self.run_closed_loop_before = True
         self.run_open_loop = True
         self.run_closed_loop_after = True
+        self.display_dark = False
+
+    def display_dark_fun(self):
+        self.display_dark = True
+
+    def display_dark_fun_out(self):
+        self.display_dark = False
+
 
     # stimulus functions
     def gen_grating(self, grating_frequency, grating_orientation, grating_size, position):
@@ -219,9 +228,15 @@ class Stimulus:
     # Stimulus Type 2 = moving gratings ================================================
     def run_game_2(self, event_flags: EventFlags):
         event_display_stimulus = event_flags["event_display_stimulus"]
-
+        event_display_dark_screen = event_flags["event_display_dark_screen"]
         event_display_stimulus.clear()
+        event_display_dark_screen.clear()
         self.reset_loop_flags()
+
+        ### create window grey
+        self.win.color=self.settings.background_color
+        self.win.flip()
+        self.win.flip()
 
         if self.stimulus_sides["left"]:
             right_frequency = self.get_grating_frequency(self.settings.stimulus_correct_side["grating_frequency"])
@@ -294,9 +309,20 @@ class Stimulus:
             self.win.flip()
         self.win.flip()
 
+        # ---------------------------------------------------------------------------
+        # code for display black screen after wrong trial
+        # ---------------------------------------------------------------------------
+        event_display_dark_screen.wait()
+        while self.display_dark:
+            # display dark screen only after wrong choices
+            self.win.color=[-1,-1,-1]
+            self.win.flip()
+            self.win.flip()
+
         # cleanup for next loop
         self.reset_loop_flags()
         event_display_stimulus.clear()
+        event_display_dark_screen.clear()
 
     # Stimulus Type 1 = single moving grating ==========================================
     def run_game_1(self, event_flags: EventFlags):
